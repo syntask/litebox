@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-simMode = False
+simMode = True
 
 import sys
 import os
@@ -21,6 +21,7 @@ from PIL import Image, ImageDraw, ImageFont
 import flask
 import threading
 import queue
+import requests
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -122,7 +123,123 @@ def timeMeridiem():
     
     return image
 
-
+def currentWeather():
+    # Adjustable variables
+    tempFont = ImageFont.truetype(basedir + '/assets/helvetica/Helvetica.ttf', 42)
+    conditionFont = ImageFont.truetype(basedir + '/assets/helvetica/Helvetica.ttf', 12)
+    windFont = ImageFont.truetype(basedir + '/assets/helvetica/Helvetica.ttf', 12)
+    textColor = 0
+    # get weather from https://wttr.in/msp?format=j1
+    
+    # Constants
+    canvas_width = 250
+    canvas_height = 122
+    image = Image.new('1', (canvas_width, canvas_height), 255)
+    draw = ImageDraw.Draw(image)
+    weatherCodes = {
+        "113": {"apiName": "Sunny", "icon": "clear-day"},
+        "116": {"apiName": "Partly cloudy", "icon": "partly-cloudy-day"},
+        "119": {"apiName": "Cloudy", "icon": "overcast"},
+        "122": {"apiName": "Overcast", "icon": "overcast"},
+        "143": {"apiName": "Mist", "icon": "fog"},
+        "176": {"apiName": "Patchy rain possible", "icon": "rain"},
+        "179": {"apiName": "Patchy snow possible", "icon": "snow"},
+        "182": {"apiName": "Patchy sleet possible", "icon": "rain-snow-mix"},
+        "185": {"apiName": "Patchy sleet possible", "icon": "rain-snow-mix"},
+        "200": {"apiName": "Thundery outbreaks", "icon": "thunderstorm"},
+        "227": {"apiName": "Blowing snow", "icon": "snow"},
+        "230": {"apiName": "Blowing snow", "icon": "snow"},
+        "248": {"apiName": "Fog", "icon": "fog"},
+        "260": {"apiName": "Freezing fog", "icon": "fog"},
+        "263": {"apiName": "Patchy light rain", "icon": "rain"},
+        "266": {"apiName": "Light drizzle", "icon": "rain"},
+        "284": {"apiName": "Heavy freezing drizzle", "icon": "rain-snow-mix"},
+        "293": {"apiName": "Patchy light rain", "icon": "rain"},
+        "296": {"apiName": "Light rain", "icon": "rain"},
+        "299": {"apiName": "Moderate rain at times", "icon": "rain"},
+        "302": {"apiName": "Moderate rain", "icon": "rain"},
+        "305": {"apiName": "Heavy rain at times", "icon": "rain"},
+        "308": {"apiName": "Heavy rain", "icon": "rain"},
+        "311": {"apiName": "Light freezing rain", "icon": "rain-snow-mix"},
+        "314": {"apiName": "Moderate or heavy freezing rain", "icon": "rain-snow-mix"},
+        "317": {"apiName": "Light sleet", "icon": "rain-snow-mix"},
+        "320": {"apiName": "Moderate or heavy sleet", "icon": "rain-snow-mix"},
+        "323": {"apiName": "Patchy light snow", "icon": "snow"},
+        "326": {"apiName": "Light snow", "icon": "snow"},
+        "329": {"apiName": "Patchy moderate snow", "icon": "snow"},
+        "332": {"apiName": "Moderate snow", "icon": "snow"},
+        "335": {"apiName": "Patchy heavy snow", "icon": "snow"},
+        "338": {"apiName": "Heavy snow", "icon": "snow"},
+        "350": {"apiName": "Ice pellets", "icon": "rain-snow-mix"},
+        "353": {"apiName": "Light rain shower", "icon": "rain"},
+        "356": {"apiName": "Moderate or heavy rain shower", "icon": "rain"},
+        "359": {"apiName": "Torrential rain shower", "icon": "rain"},
+        "362": {"apiName": "Light sleet showers", "icon": "rain-snow-mix"},
+        "365": {"apiName": "Moderate or heavy sleet showers", "icon": "rain-snow-mix"},
+        "368": {"apiName": "Light snow showers", "icon": "snow"},
+        "365": {"apiName": "Moderate or heavy sleet showers", "icon": "snow"},
+        "335": {"apiName": "Patchy heavy snow", "icon": "snow"},
+        "338": {"apiName": "Heavy snow", "icon": "snow"},
+        "350": {"apiName": "Ice pellets", "icon": "rain-snow-mix"},
+        "335": {"apiName": "Patchy heavy snow", "icon": "snow"},
+        "338": {"apiName": "Heavy snow", "icon": "snow"},
+        "332": {"apiName": "Moderate snow", "icon": "snow"},
+        "329": {"apiName": "Patchy moderate snow", "icon": "snow"},
+        "122": {"apiName": "Overcast", "icon": "overcast"},
+        "119": {"apiName": "Cloudy", "icon": "overcast"},
+        "116": {"apiName": "Partly cloudy", "icon": "partly-cloudy-day"},
+        "113": {"apiName": "Sunny", "icon": "clear-day"},
+        "143": {"apiName": "Mist", "icon": "fog"},
+        "248": {"apiName": "Fog", "icon": "fog"},
+        "386": {"apiName": "Patchy light rain with thunder", "icon": "thunderstorm"},
+        "389": {"apiName": "Moderate or heavy rain with thunder", "icon": "thunderstorm"},
+        "392": {"apiName": "Patchy light snow with thunder", "icon": "snow"},
+        "395": {"apiName": "Moderate or heavy snow with thunder", "icon": "snow"}
+    }
+    
+    # Computed variables
+    weather = requests.get('https://wttr.in/msp?format=j1').json()
+    print(weather)
+    weatherCode = weather['current_condition'][0]['weatherCode']
+    weatherDesc = weather['current_condition'][0]['weatherDesc'][0]['value']
+    tempC = weather['current_condition'][0]['temp_C']
+    tempF = weather['current_condition'][0]['temp_F']
+    windKph = weather['current_condition'][0]['windspeedKmph']
+    windMph = weather['current_condition'][0]['windspeedMiles']
+    windKts = str(int(round(float(windMph) * 0.868976)))
+    windDir = weather['current_condition'][0]['winddir16Point']
+    windDeg = weather['current_condition'][0]['winddirDegree']
+    icon = weatherCodes[weatherCode]['icon']
+    
+    # Insert the 100x100 weather icon here
+    image.paste(Image.open(basedir + '/assets/weather-icons/' + icon + '.bmp'), (0, 20))
+    
+    drawText(draw, weatherDesc, conditionFont, textColor, 105, 41, 'left', 'center')
+    drawText(draw, tempF + '°F', tempFont, textColor, 105, 69, 'left', 'center')
+    drawText(draw, windKts + ' kts ' + windDir, windFont, textColor, 105, 99, 'left', 'center')
+    
+    topBarImage = topBar()
+    image.paste(topBarImage, (0, 0))
+    
+    return image
+    
+def topBar():
+    # Adjustable variables
+    textSize = 11
+    textFont = ImageFont.truetype(basedir + '/assets/helvetica/Helvetica.ttf', textSize)
+    textColor = 0
+    
+    # Constants
+    canvas_width = 250
+    canvas_height = 16
+    image = Image.new('1', (canvas_width, canvas_height), 255)
+    draw = ImageDraw.Draw(image)
+    
+    drawText(draw, time.strftime('%A, %B %d %Y'), textFont, textColor, 3, 3, 'left', 'top')
+    drawText(draw, time.strftime('%I:%M %p'), textFont, textColor, canvas_width - 3, 3, 'right', 'top')
+    draw.line([(0, canvas_height - 1), (canvas_width, canvas_height - 1)], fill=0, width=1)
+    
+    return image
 
 # MARK: - Main
 epd = None
@@ -142,7 +259,7 @@ def display_thread_function(update_queue):
             epd.displayPartBaseImage(epd.getbuffer(blank_image))
             
         def update_screen():
-            image = timeMeridiem()
+            image = currentWeather()
             if simMode:
                 update_queue.put(image)
             else:
@@ -154,9 +271,9 @@ def display_thread_function(update_queue):
         while not stop_display_thread:
             now = time.time()
             # Calculate the remaining time until the next full minute
-            sleep_time = 60 - (now % 60) + 1
+            sleep_time = 60 - (now % 60)
             # Use shorter sleep intervals to check for stop requests more frequently
-            for _ in range(int(sleep_time)):
+            for _ in range(int(sleep_time * 10)):  # Multiply by 10 to convert to 0.1 second intervals
                 if stop_display_thread:
                     break
                 time.sleep(0.1)

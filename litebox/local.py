@@ -116,7 +116,7 @@ def currentWeather():
     
     # Constants
     canvas_width = 250
-    canvas_height = 90
+    canvas_height = 122
     image = Image.new('1', (canvas_width, canvas_height), 255)
     draw = ImageDraw.Draw(image)
     weatherCodes = {
@@ -195,11 +195,14 @@ def currentWeather():
     icon = weatherCodes[weatherCode]['icon']
     
     # Insert the 100x100 weather icon here
-    image.paste(Image.open(basedir + '/assets/weather-icons/' + icon + '.bmp'), (0, -5))
+    image.paste(Image.open(basedir + '/assets/weather-icons/' + icon + '.bmp'), (0, 20))
     
-    drawText(draw, weatherDesc, conditionFont, textColor, 100, 16, 'left', 'center')
-    drawText(draw, tempF + '°F', tempFont, textColor, 100, 44, 'left', 'center')
-    drawText(draw, windKts + ' kts ' + windDir, windFont, textColor, 100, 74, 'left', 'center')
+    drawText(draw, weatherDesc, conditionFont, textColor, 105, 41, 'left', 'center')
+    drawText(draw, tempF + '°F', tempFont, textColor, 105, 69, 'left', 'center')
+    drawText(draw, windKts + ' kts ' + windDir, windFont, textColor, 105, 99, 'left', 'center')
+    
+    topBarImage = topBar()
+    image.paste(topBarImage, (0, 0))
     
     return image
     
@@ -223,9 +226,5 @@ def topBar():
 
 
 # MARK: - Main
-weatherImage = currentWeather()
-topBarImage = topBar()
-combinedImage = Image.new('1', (250, 122), 255)
-combinedImage.paste(weatherImage, (0, 16))
-combinedImage.paste(topBarImage, (0, 0))
-combinedImage.save('image.bmp')
+image = currentWeather()
+image.save('image.bmp')
