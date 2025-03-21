@@ -15,7 +15,6 @@ if simMode:
 else:
     from waveshare_epd import epd2in13_V4
 
-
 import time
 from PIL import Image, ImageDraw, ImageFont
 import flask
@@ -62,7 +61,7 @@ def drawText(draw, text, font, fill, x, y, halign, valign):
 def timeSplitFlap():
     # Adjustable variables
     timeSize = 85
-    timeFont = ImageFont.truetype(basedir + '/assets/helvetica/Helvetica-Bold.ttf', timeSize)
+    timeFont = ImageFont.truetype(basedir + '/assets/fonts/helvetica_bold.ttf', timeSize)
     textColor = 255
     
     # Constants
@@ -91,10 +90,10 @@ def timeSplitFlap():
 def timePlain():
     # Adjustable variables
     timeSize = 85
-    timeFont = ImageFont.truetype(basedir + '/assets/avigea.ttf', timeSize)
+    timeFont = ImageFont.truetype(basedir + '/assets/fonts/avigea.ttf', timeSize)
     textColor = 0
     dateSize = 16
-    dateFont = ImageFont.truetype(basedir + '/assets/avigea.ttf', dateSize)
+    dateFont = ImageFont.truetype(basedir + '/assets/fonts/avigea.ttf', dateSize)
     
     # Constants
     canvas_width = 250
@@ -118,8 +117,8 @@ def timeMeridiem():
     # Adjustable variables
     timeSize = 85
     meridiemSize = 25
-    timeFont = ImageFont.truetype(basedir + '/assets/avigea.ttf', timeSize)
-    meridiemFont = ImageFont.truetype(basedir + '/assets/avigea.ttf', meridiemSize)
+    timeFont = ImageFont.truetype(basedir + '/assets/fonts/avigea.ttf', timeSize)
+    meridiemFont = ImageFont.truetype(basedir + '/assets/fonts/avigea.ttf', meridiemSize)
     meridiemPadding = 4
     textColor = 0
     
@@ -143,9 +142,9 @@ def timeMeridiem():
 
 def currentWeather():
     # Adjustable variables
-    tempFont = ImageFont.truetype(basedir + '/assets/helvetica/Helvetica.ttf', 42)
-    conditionFont = ImageFont.truetype(basedir + '/assets/helvetica/Helvetica.ttf', 12)
-    windFont = ImageFont.truetype(basedir + '/assets/helvetica/Helvetica.ttf', 12)
+    tempFont = ImageFont.truetype(basedir + '/assets/fonts/helvetica.ttf', 36)
+    conditionFont = ImageFont.truetype(basedir + '/assets/fonts/dejavu_sans_mono.ttf', 12)
+    windFont = ImageFont.truetype(basedir + '/assets/fonts/dejavu_sans_mono.ttf', 12)
     textColor = 0
     
     # Constants
@@ -228,32 +227,32 @@ def currentWeather():
     icon = weatherCodes[weatherCode]['icon']
     
     # Insert the 100x100 weather icon here
-    image.paste(Image.open(basedir + '/assets/weather-icons/' + icon + '.bmp'), (0, 20))
+    image.paste(Image.open(basedir + '/assets/weather_icons/' + icon + '.bmp'), (0, -2))
     
-    drawText(draw, weatherDesc, conditionFont, textColor, 105, 41, 'left', 'center')
-    drawText(draw, tempF + '°F', tempFont, textColor, 105, 69, 'left', 'center')
-    drawText(draw, windKts + ' kts ' + windDir, windFont, textColor, 105, 99, 'left', 'center')
+    drawText(draw, weatherDesc, conditionFont, textColor, 105, 22, 'left', 'center')
+    drawText(draw, tempF + '°F', tempFont, textColor, 105, 50, 'left', 'center')
+    drawText(draw, windKts + ' kts ' + windDir, windFont, textColor, 105, 78, 'left', 'center')
     
-    topBarImage = topBar()
-    image.paste(topBarImage, (0, 0))
+    status_bar_image = status_bar()
+    image.paste(status_bar_image, (0, canvas_height - 22))
     
     return image
     
-def topBar():
+def status_bar():
     # Adjustable variables
-    textSize = 11
-    textFont = ImageFont.truetype(basedir + '/assets/helvetica/Helvetica.ttf', textSize)
+    textSize = 12
+    textFont = ImageFont.truetype(basedir + '/assets/fonts/dejavu_sans_mono.ttf', textSize)
     textColor = 0
     
     # Constants
     canvas_width = 250
-    canvas_height = 16
+    canvas_height = 22
     image = Image.new('1', (canvas_width, canvas_height), 255)
     draw = ImageDraw.Draw(image)
     
-    drawText(draw, time.strftime('%A, %B %d %Y'), textFont, textColor, 3, 3, 'left', 'top')
-    drawText(draw, time.strftime('%I:%M %p'), textFont, textColor, canvas_width - 3, 3, 'right', 'top')
-    draw.line([(0, canvas_height - 1), (canvas_width, canvas_height - 1)], fill=0, width=1)
+    drawText(draw, time.strftime('%A, %B %d %Y'), textFont, textColor, 6, 4, 'left', 'top')
+    drawText(draw, time.strftime('%I:%M %p'), textFont, textColor, canvas_width - 6, 4, 'right', 'top')
+    draw.line([(0, 1), (canvas_width, 1)], fill=0, width=1)
     
     return image
 
