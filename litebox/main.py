@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-simMode = True
+simMode = False
 
 import sys
 import os
@@ -22,11 +22,29 @@ import flask
 import threading
 import queue
 import requests
+import json
 
 logging.basicConfig(level=logging.DEBUG)
 
 
 # MARK: - Functions
+
+def req(url, file, timeout):
+    # url: URL to request
+    # file: File name to save the cached response to
+    # timeout: Time in seconds before the cache expires
+    file = basedir + '/web_cache/' + file
+    
+    if os.path.exists(file):
+        if time.time() - os.path.getmtime(file) < timeout * 60:
+            with open(file, 'r') as f:
+                text = f.read()
+                return json.loads(text)
+    response = requests.get(url)
+    with open(file, 'w') as f:
+        f.write(response.text)
+    return response.json()
+
 def drawText(draw, text, font, fill, x, y, halign, valign):
     text_bbox = draw.textbbox((0, 0), text, font=font)
     textWidth = text_bbox[2] - text_bbox[0]
@@ -129,7 +147,6 @@ def currentWeather():
     conditionFont = ImageFont.truetype(basedir + '/assets/helvetica/Helvetica.ttf', 12)
     windFont = ImageFont.truetype(basedir + '/assets/helvetica/Helvetica.ttf', 12)
     textColor = 0
-    # get weather from https://wttr.in/msp?format=j1
     
     # Constants
     canvas_width = 250
@@ -198,8 +215,7 @@ def currentWeather():
     }
     
     # Computed variables
-    weather = requests.get('https://wttr.in/msp?format=j1').json()
-    print(weather)
+    weather = req('https://wttr.in/msp?format=j1', 'weather.json', 15)
     weatherCode = weather['current_condition'][0]['weatherCode']
     weatherDesc = weather['current_condition'][0]['weatherDesc'][0]['value']
     tempC = weather['current_condition'][0]['temp_C']
@@ -289,6 +305,7 @@ def display_thread_function(update_queue):
 display_thread = threading.Thread(target=display_thread_function)
 display_thread.daemon = True  # Thread will exit when main program exits
 display_thread.start()
+
 
 # Flask server
 app = flask.Flask(__name__)
