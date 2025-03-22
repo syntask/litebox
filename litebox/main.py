@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-simMode = False
+simMode = True
 
 import sys
 import os
@@ -250,8 +250,8 @@ def status_bar():
     image = Image.new('1', (canvas_width, canvas_height), 255)
     draw = ImageDraw.Draw(image)
     
-    drawText(draw, time.strftime('%A, %B %d %Y'), textFont, textColor, 6, 4, 'left', 'top')
-    drawText(draw, time.strftime('%I:%M %p'), textFont, textColor, canvas_width - 6, 4, 'right', 'top')
+    drawText(draw, time.strftime('%a, %b ') + str(int(time.strftime('%d'))), textFont, textColor, 6, 4, 'left', 'top')
+    drawText(draw, time.strftime('%I:%M %p').lstrip('0'), textFont, textColor, canvas_width - 6, 4, 'right', 'top')
     draw.line([(0, 1), (canvas_width, 1)], fill=0, width=1)
     
     return image
