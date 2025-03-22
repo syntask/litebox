@@ -251,7 +251,7 @@ def status_bar():
     draw = ImageDraw.Draw(image)
     
     drawText(draw, time.strftime('%a, %b ') + str(int(time.strftime('%d'))), textFont, textColor, 6, 4, 'left', 'top')
-    drawText(draw, time.strftime('%I:%M %p').lstrip('0'), textFont, textColor, canvas_width - 6, 4, 'right', 'top')
+    drawText(draw, time.strftime('%I:%M %p').lstrip('0'), textFont, textColor, canvas_width - 8, 4, 'right', 'top')
     draw.line([(0, 1), (canvas_width, 1)], fill=0, width=1)
     
     return image
