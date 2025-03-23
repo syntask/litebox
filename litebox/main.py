@@ -278,7 +278,7 @@ def display_thread_function(update_queue):
             if simMode:
                 update_queue.put(image)
             else:
-                # image = image.rotate(180)
+                image = image.rotate(180)
                 epd.displayPartial(epd.getbuffer(image))
 
         update_screen()
